@@ -10,6 +10,7 @@
 
 @implementation WSCoreText
 
+//http://www.zoomfeng.com/blog/coretextshi-yong-jiao-cheng-er.html
 - (void)drawRect:(CGRect)rect
 {
     [super drawRect:rect];
