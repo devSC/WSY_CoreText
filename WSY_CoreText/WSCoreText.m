@@ -306,6 +306,8 @@
     CFRelease(numberRef);
     CFRelease(path);
     CFRelease(frameSetter);
+    
+    /*devTQ: http://blog.devtang.com/blog/2015/06/27/using-coretext-1/*/
 
 }
 
