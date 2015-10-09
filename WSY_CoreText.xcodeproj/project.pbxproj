@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FE1BED641BB7E36A0020BCDB /* tree-01.png in Resources */ = {isa = PBXBuildFile; fileRef = FE1BED631BB7E36A0020BCDB /* tree-01.png */; settings = {ASSET_TAGS = (); }; };
 		FEDB746C1B56A25C003DDB79 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = FEDB746B1B56A25C003DDB79 /* main.m */; };
 		FEDB746F1B56A25C003DDB79 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = FEDB746E1B56A25C003DDB79 /* AppDelegate.m */; };
 		FEDB74721B56A25C003DDB79 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FEDB74711B56A25C003DDB79 /* ViewController.m */; };
@@ -28,6 +29,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		FE1BED631BB7E36A0020BCDB /* tree-01.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tree-01.png"; sourceTree = "<group>"; };
 		FEDB74661B56A25C003DDB79 /* WSY_CoreText.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WSY_CoreText.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FEDB746A1B56A25C003DDB79 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FEDB746B1B56A25C003DDB79 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -91,6 +93,7 @@
 				FEDB748F1B56A712003DDB79 /* WSCoreText.h */,
 				FEDB74901B56A712003DDB79 /* WSCoreText.m */,
 				FEDB74731B56A25C003DDB79 /* Main.storyboard */,
+				FE1BED631BB7E36A0020BCDB /* tree-01.png */,
 				FEDB74761B56A25C003DDB79 /* Images.xcassets */,
 				FEDB74781B56A25C003DDB79 /* LaunchScreen.xib */,
 				FEDB74691B56A25C003DDB79 /* Supporting Files */,
@@ -204,6 +207,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FE1BED641BB7E36A0020BCDB /* tree-01.png in Resources */,
 				FEDB74751B56A25C003DDB79 /* Main.storyboard in Resources */,
 				FEDB747A1B56A25C003DDB79 /* LaunchScreen.xib in Resources */,
 				FEDB74771B56A25C003DDB79 /* Images.xcassets in Resources */,
@@ -424,6 +428,7 @@
 				FEDB748B1B56A25C003DDB79 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		FEDB748C1B56A25C003DDB79 /* Build configuration list for PBXNativeTarget "WSY_CoreTextTests" */ = {
 			isa = XCConfigurationList;
@@ -432,6 +437,7 @@
 				FEDB748E1B56A25C003DDB79 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
