@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		527351551BC7C28A0037EA06 /* Class&MetaClass.001.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 527351541BC7C28A0037EA06 /* Class&MetaClass.001.jpg */; settings = {ASSET_TAGS = (); }; };
 		FEDB746C1B56A25C003DDB79 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = FEDB746B1B56A25C003DDB79 /* main.m */; };
 		FEDB746F1B56A25C003DDB79 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = FEDB746E1B56A25C003DDB79 /* AppDelegate.m */; };
 		FEDB74721B56A25C003DDB79 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FEDB74711B56A25C003DDB79 /* ViewController.m */; };
@@ -28,6 +29,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		527351541BC7C28A0037EA06 /* Class&MetaClass.001.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "Class&MetaClass.001.jpg"; sourceTree = "<group>"; };
 		FEDB74661B56A25C003DDB79 /* WSY_CoreText.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WSY_CoreText.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FEDB746A1B56A25C003DDB79 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FEDB746B1B56A25C003DDB79 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -84,6 +86,7 @@
 		FEDB74681B56A25C003DDB79 /* WSY_CoreText */ = {
 			isa = PBXGroup;
 			children = (
+				527351541BC7C28A0037EA06 /* Class&MetaClass.001.jpg */,
 				FEDB746D1B56A25C003DDB79 /* AppDelegate.h */,
 				FEDB746E1B56A25C003DDB79 /* AppDelegate.m */,
 				FEDB74701B56A25C003DDB79 /* ViewController.h */,
@@ -206,6 +209,7 @@
 			files = (
 				FEDB74751B56A25C003DDB79 /* Main.storyboard in Resources */,
 				FEDB747A1B56A25C003DDB79 /* LaunchScreen.xib in Resources */,
+				527351551BC7C28A0037EA06 /* Class&MetaClass.001.jpg in Resources */,
 				FEDB74771B56A25C003DDB79 /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -356,6 +360,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = WSY_CoreText/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -366,6 +371,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = WSY_CoreText/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -424,6 +430,7 @@
 				FEDB748B1B56A25C003DDB79 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		FEDB748C1B56A25C003DDB79 /* Build configuration list for PBXNativeTarget "WSY_CoreTextTests" */ = {
 			isa = XCConfigurationList;
@@ -432,6 +439,7 @@
 				FEDB748E1B56A25C003DDB79 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
