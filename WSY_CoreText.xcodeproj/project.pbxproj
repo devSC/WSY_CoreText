@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		527351551BC7C28A0037EA06 /* Class&MetaClass.001.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 527351541BC7C28A0037EA06 /* Class&MetaClass.001.jpg */; settings = {ASSET_TAGS = (); }; };
+		527351551BC7C28A0037EA06 /* Class&MetaClass.001.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 527351541BC7C28A0037EA06 /* Class&MetaClass.001.jpg */; };
 		FEDB746C1B56A25C003DDB79 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = FEDB746B1B56A25C003DDB79 /* main.m */; };
 		FEDB746F1B56A25C003DDB79 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = FEDB746E1B56A25C003DDB79 /* AppDelegate.m */; };
 		FEDB74721B56A25C003DDB79 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FEDB74711B56A25C003DDB79 /* ViewController.m */; };
@@ -16,6 +16,8 @@
 		FEDB747A1B56A25C003DDB79 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = FEDB74781B56A25C003DDB79 /* LaunchScreen.xib */; };
 		FEDB74861B56A25C003DDB79 /* WSY_CoreTextTests.m in Sources */ = {isa = PBXBuildFile; fileRef = FEDB74851B56A25C003DDB79 /* WSY_CoreTextTests.m */; };
 		FEDB74911B56A712003DDB79 /* WSCoreText.m in Sources */ = {isa = PBXBuildFile; fileRef = FEDB74901B56A712003DDB79 /* WSCoreText.m */; };
+		FEE1958C1CB94069003E637E /* icon1.jpg in Resources */ = {isa = PBXBuildFile; fileRef = FEE1958B1CB94069003E637E /* icon1.jpg */; };
+		FEE195901CB940F8003E637E /* heart@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FEE1958F1CB940F8003E637E /* heart@2x.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,6 +47,8 @@
 		FEDB74851B56A25C003DDB79 /* WSY_CoreTextTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WSY_CoreTextTests.m; sourceTree = "<group>"; };
 		FEDB748F1B56A712003DDB79 /* WSCoreText.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WSCoreText.h; sourceTree = "<group>"; };
 		FEDB74901B56A712003DDB79 /* WSCoreText.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WSCoreText.m; sourceTree = "<group>"; };
+		FEE1958B1CB94069003E637E /* icon1.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = icon1.jpg; sourceTree = "<group>"; };
+		FEE1958F1CB940F8003E637E /* heart@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "heart@2x.png"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -86,6 +90,8 @@
 		FEDB74681B56A25C003DDB79 /* WSY_CoreText */ = {
 			isa = PBXGroup;
 			children = (
+				FEE1958B1CB94069003E637E /* icon1.jpg */,
+				FEE1958F1CB940F8003E637E /* heart@2x.png */,
 				527351541BC7C28A0037EA06 /* Class&MetaClass.001.jpg */,
 				FEDB746D1B56A25C003DDB79 /* AppDelegate.h */,
 				FEDB746E1B56A25C003DDB79 /* AppDelegate.m */,
@@ -210,6 +216,8 @@
 				FEDB74751B56A25C003DDB79 /* Main.storyboard in Resources */,
 				FEDB747A1B56A25C003DDB79 /* LaunchScreen.xib in Resources */,
 				527351551BC7C28A0037EA06 /* Class&MetaClass.001.jpg in Resources */,
+				FEE1958C1CB94069003E637E /* icon1.jpg in Resources */,
+				FEE195901CB940F8003E637E /* heart@2x.png in Resources */,
 				FEDB74771B56A25C003DDB79 /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -360,7 +368,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = WSY_CoreText/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -371,7 +379,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = WSY_CoreText/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

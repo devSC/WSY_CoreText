@@ -8,7 +8,9 @@
 #import <CoreText/CoreText.h>
 #import "WSCoreText.h"
 
-@implementation WSCoreText
+@implementation WSCoreText {
+    UIImage *localImage;
+}
 
 //http://www.zoomfeng.com/blog/coretextshi-yong-jiao-cheng-er.html
 - (void)drawRect:(CGRect)rect
@@ -205,7 +207,7 @@
 //    CTParagraphStyleRef paragraphStyle = CTParagraphStyleCreate(theSetting, numberOfStyleSetting);
 //    //4.1.1将设置的行样式应用到字段
 //    [attributedString addAttribute:(id)kCTParagraphStyleAttributeName value:(__bridge id)paragraphStyle range:NSMakeRange(0, attributedString.length)];
-//    
+//
 //    //4.2调整字间距
 //    long kerningNumber = 1;
 //    CFNumberRef numberRef = CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt8Type, &kerningNumber);
@@ -225,6 +227,8 @@
     
     
     /*--------------------------------4-------------------------------------*/
+    static NSString *KImageNameKey = @"imageName";
+    
     //1: 获取当前上下文
     CGContextRef context = UIGraphicsGetCurrentContext();
     //2: 翻转坐标系
@@ -268,37 +272,141 @@
     //4.3插入图片
     //CTRunDelegateCallbacks 一个用于保存指针的结构体， 由CTRun delegate进行回调
     CTRunDelegateCallbacks callBacks;
-    memset(&callBacks, 0, sizeof(CTRunDelegateCallbacks));
+//    memset(&callBacks, 0, sizeof(CTRunDelegateCallbacks));
     callBacks.version = kCTRunDelegateVersion1;
-    callBacks.getAscent = ascentCallBack;
-    callBacks.getDescent = descentCallBack;
-    callBacks.getWidth = widthCallBack;
+    callBacks.dealloc = RunDelegateDeallocCallBack;
+    callBacks.getAscent = RunDelegateGetAscentCallBack;
+    callBacks.getDescent = RunDelegateGetDescentCallBack;
+    callBacks.getWidth = RunDelegateGetWidthCallBack;
+    
     //图片信息
-    NSDictionary *imageInfo = @{@"width" : @"170", @"height" : @"100"};
+    {
+        NSString *imageName = @"heart"; //本地图片
+        
+        //设置CTRunDelegate
+        CTRunDelegateRef delegate = CTRunDelegateCreate(&callBacks, (__bridge void *)imageName);
+        
+        //使用OxFFC作为空白的展位符
+//        unichar objectReplacementChar = 0xFFFC; //图片占位
+//        NSString *content = [NSString stringWithCharacters:&objectReplacementChar length:1];
+        NSMutableAttributedString *space = [[NSMutableAttributedString alloc] initWithString:@" "];
+        //本地图片
+        [space addAttribute:(NSString *)kCTRunDelegateAttributeName value:(__bridge id)delegate range:NSMakeRange(0, 1)]; //设置代理项
+        CFRelease(delegate);
+        
+        [space addAttribute:KImageNameKey value:imageName range:NSMakeRange(0, 1)];
+        
+        //将创建的空白attributedString插入当前的attributeString中，位置任意，但不能越界
+        [attributedString insertAttributedString:space atIndex:10];
+        
+
+    }
     
-    //设置CTRunDelegate
-    CTRunDelegateRef delegate = CTRunDelegateCreate(&callBacks, (__bridge void *)imageInfo);
+    NSString *picUrl = @"http://www.zoomfeng.com/images/2015/05/27/CoreText_3.png";
     
-    //使用OxFFC作为空白的展位符
-    unichar objectReplacementChar = 0xFFFC;
-    NSString *content = [NSString stringWithCharacters:&objectReplacementChar length:1];
-    NSMutableAttributedString *space = [[NSMutableAttributedString alloc] initWithString:content];
-    CFAttributedStringSetAttribute((CFMutableAttributedStringRef)space, CFRangeMake(0, 1), kCTRunDelegateAttributeName, delegate);
-    CFRelease(delegate);
-    
-    //将创建的空白attributedString插入当前的attributeString中，位置任意，但不能越界
-    [attributedString insertAttributedString:space atIndex:15];
-//    [attributedString appendAttributedString:space];
+//    {
+        NSDictionary *imageInfo = @{@"width" : @330, @"height" : @204};
+        
+        CTRunDelegateRef rundelegate = CTRunDelegateCreate(&callBacks, (__bridge void *)imageInfo);
+        
+        unichar objectReplacementChar = 0xFFFC;
+        NSString *content = [NSString stringWithCharacters:&objectReplacementChar length:1];
+        
+        NSMutableAttributedString *space = [[NSMutableAttributedString alloc] initWithString:content];
+        
+        [space addAttribute:(NSString *)kCTRunDelegateAttributeName value:(__bridge id)rundelegate range:NSMakeRange(0, 1)];
+        
+        CFRelease(rundelegate);
+        
+        [attributedString insertAttributedString:space atIndex:20];
+//
+//    }
+
     
     //5: 根据string生成CTFramesetterRef
     CTFramesetterRef frameSetter = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)attributedString);
     CTFrameRef frame = CTFramesetterCreateFrame(frameSetter, CFRangeMake(0, [attributedString length]), path, NULL);
-    //6: 进行绘制
+    //6: 绘制图片以外部分
     CTFrameDraw(frame, context);
     
-    //10: 绘制图片
-    UIImage *image = [UIImage imageNamed:@"Class&MetaClass.001.jpg"];
-    CGContextDrawImage(context, [self imagePosotionInCTFrame:frame], image.CGImage);
+    //
+    CFArrayRef lines = CTFrameGetLines(frame);
+    CGPoint lineOrigins[CFArrayGetCount(lines)];
+    //把ctframe里每一行的初始坐标写到数组里
+    CTFrameGetLineOrigins(frame, CFRangeMake(0, 0), lineOrigins);
+    
+    //便利CTRun找出图片所在的CTRun并进行绘制
+    for (int i = 0; i < CFArrayGetCount(lines); i++) {
+        //遍历每一行CTLine
+        CTLineRef line = CFArrayGetValueAtIndex(lines, i);
+        CGFloat lineAscent;
+        CGFloat lineDscent;
+        CGFloat lineLeading; //行距
+        CTLineGetTypographicBounds(line, &lineAscent, &lineDscent, &lineLeading);
+        
+        CFArrayRef runs = CTLineGetGlyphRuns(line);
+        for (int j = 0; j < CFArrayGetCount(runs); j++) {
+            //遍历每一个CTRun CTLine中包含很多CTRun
+            CGFloat runAscent;
+            CGFloat runDescent;
+            CGPoint lineOrigin = lineOrigins[i]; //获取改行的初始坐标
+            CTRunRef run = CFArrayGetValueAtIndex(runs, j); //获取当前的CTRun
+            NSDictionary *attributes = (NSDictionary *)CTRunGetAttributes(run);
+            CGRect runRect;
+            runRect.size.width = CTRunGetTypographicBounds(run, CFRangeMake(0, 0), &runAscent, &runDescent, NULL);
+            
+            // 这一段可参考Nimbus的NIAttributedLabel
+            runRect = CGRectMake(lineOrigin.x + CTLineGetOffsetForStringIndex(line, CTRunGetStringRange(run).location, NULL), lineOrigin.y - runDescent, runRect.size.width, runAscent + runDescent);
+            
+            NSString *imageName = [attributes objectForKey:KImageNameKey];
+            
+            if ([imageName isKindOfClass:[NSString class]]) {
+                //本地图片
+                UIImage *image = [UIImage imageNamed:imageName];
+                
+                CGRect imageDrawRect;
+                imageDrawRect.size = image.size;
+                NSLog(@"%.2f",lineOrigin.x); // 该值是0,runRect已经计算过起始值
+                imageDrawRect.origin.x = runRect.origin.x;
+                imageDrawRect.origin.y = lineOrigin.y;
+                CGContextDrawImage(context, imageDrawRect, image.CGImage);
+            }
+            else {
+                imageName = nil;
+                
+                CTRunDelegateRef delegate = (__bridge CTRunDelegateRef)[attributes objectForKey:(__bridge id)kCTRunDelegateAttributeName];
+                if (!delegate) {
+                    continue; //非图片的CTRun则跳过
+                }
+                else {
+                    //网络图
+                    UIImage *image;
+                    
+                    if (!self->localImage) {
+                        //使用占位图
+                        image = [UIImage imageNamed:@"heart"]; //占位图
+                        
+                        [self downLoadImageWithURL:[NSURL URLWithString:picUrl]];
+                    }
+                    else {
+                        image = self->localImage;
+                    }
+                    
+                    //绘制网络图片
+                    CGRect imageRect;
+//                    imageRect.size = image.size;
+                    imageRect.size = CGSizeMake(330, 204); //这里要和delegate中设置的图片大小相同 否则则会导致其他文字部分被遮挡
+                    NSLog(@"%.2f",lineOrigin.x); // 该值是0,runRect已经计算过起始值
+                    imageRect.origin.x = runRect.origin.x;
+                    imageRect.origin.y = lineOrigin.y;
+                    CGContextDrawImage(context, imageRect, image.CGImage);
+                }
+            }
+            
+            
+            
+        }
+    }
     
     //7: 内存管理 ARC不能管理CF开头的对象
     CFRelease(frame);
@@ -371,15 +479,97 @@
     return CGRectZero;
 }
 
-static CGFloat ascentCallBack(void *ref) {
-    return [(NSNumber *)[(__bridge NSDictionary *)ref objectForKey:@"height"] floatValue];
+//static CGFloat ascentCallBack(void *ref) {
+//    return [(NSNumber *)[(__bridge NSDictionary *)ref objectForKey:@"height"] floatValue];
+//}
+//
+//static CGFloat descentCallBack(void *ref) {
+//    return 0;
+//}
+//
+//static CGFloat widthCallBack(void *ref) {
+//    return [(NSNumber *)[(__bridge NSDictionary *)ref objectForKey:@"width"] floatValue];
+//}
+
+#pragma mark - Image delegate
+void RunDelegateDeallocCallBack(void *refcon) {
+    NSLog(@"RunDelegate dealloc");
 }
 
-static CGFloat descentCallBack(void *ref) {
+CGFloat RunDelegateGetAscentCallBack(void *refCon) {
+    NSString *imageName = (__bridge NSString *)refCon;
+    if ([imageName isKindOfClass:[NSString class]]) {
+        return [UIImage imageNamed:imageName].size.height;
+    }
+    else {
+        return [[(__bridge NSDictionary *)refCon objectForKey:@"height"] floatValue];
+    }
+}
+
+
+CGFloat RunDelegateGetDescentCallBack(void *refCon) {
     return 0;
 }
 
-static CGFloat widthCallBack(void *ref) {
-    return [(NSNumber *)[(__bridge NSDictionary *)ref objectForKey:@"width"] floatValue];
+CGFloat RunDelegateGetWidthCallBack(void *refCon) {
+    NSString *name = (__bridge NSString *)refCon;
+    
+    if ([name isKindOfClass:[NSString class]]) {
+        UIImage *image = [UIImage imageNamed:name];
+        return image.size.width;
+    }
+    else {
+        return [[(__bridge NSDictionary *)refCon objectForKey:@"width"] floatValue];
+    }
 }
+
+- (void)downLoadImageWithURL:(NSURL *)url
+{
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        
+        NSData *data = [NSData dataWithContentsOfURL:url];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                self->localImage = [UIImage imageWithData:data];
+                
+                if (self->localImage)
+                {
+                    [self setNeedsDisplay];
+                }
+                
+            });
+        });
+}
+
+
+
 @end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
