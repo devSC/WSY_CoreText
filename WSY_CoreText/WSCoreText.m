@@ -10,6 +10,13 @@
 
 @implementation WSCoreText {
     UIImage *localImage;
+    NSString *defaultString;
+    UIFont *defaultFont;
+}
+
+- (void)awakeFromNib {
+    defaultString = @"手工客->中国最大的手工兴趣社区\n 手工客是一款手工学习神器，😳😊😳😊😳😊😳手工爱好者必备应用，手工客网倾力打造。聚集了国内众多的手工😳😊😳😊😳😊😳艺人和手工爱好者，是一个学习手工和分享手工作品的互动社区。😳😊😳😊😳😊😳";
+    defaultFont = [UIFont fontWithName:@"Avenir Light" size:15];
 }
 
 //http://www.zoomfeng.com/blog/coretextshi-yong-jiao-cheng-er.html
@@ -227,6 +234,284 @@
     
     
     /*--------------------------------4-------------------------------------*/
+//    [self drawTextAndPicture];
+    
+    /*--------------------------------5-------------------------------------*/
+//    [self drawRectWithLineByLine];
+    /*--------------------------------6-------------------------------------*/
+    [self drawRectWithLineByLineAligment];
+    
+    /*devTQ: http://blog.devtang.com/blog/2015/06/27/using-coretext-1/*/
+
+}
+
+#pragma mark - 一行一行绘制，未调整行高
+- (void)drawRectWithLineByLine {
+    //
+    
+    CGFloat width = CGRectGetWidth(self.bounds);
+    
+    //1
+    NSMutableAttributedString *attributed = [[NSMutableAttributedString alloc] initWithString:defaultString];
+    
+    //2
+    [self.class addDefaultAttribuateForContent:attributed withFont:defaultFont];
+    
+    CGFloat textHeight = [self.class textHeightWithText:defaultString width:width font:defaultFont];
+    
+    //3
+    CGMutablePathRef path = CGPathCreateMutable();
+    CGPathAddRect(path, NULL, CGRectMake(0, 0, width, textHeight));
+    
+    
+    //4.生成CTFramesetterRef
+    CTFramesetterRef setterRef = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)attributed);
+    
+    CTFrameRef frameRef = CTFramesetterCreateFrame(setterRef, CFRangeMake(0, defaultString.length), path, NULL);
+    
+    //5
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    //6
+    CGContextSetTextMatrix(context, CGAffineTransformIdentity);
+    CGContextTranslateCTM(context, 0, textHeight);
+    CGContextScaleCTM(context, 1.0, -1.0);
+    
+    //
+    CGPathAddRect(path, NULL, CGRectMake(0, 0, width, textHeight));
+    
+    
+    //一行行绘制
+    CFArrayRef lines = CTFrameGetLines(frameRef);
+    CFIndex lineCount = CFArrayGetCount(lines);
+    CGPoint lineOrigins[lineCount];
+    
+    //把CTFrame里每一行的初始坐标写到数组里， 注意CoreText的坐标是左下角的原点
+    CTFrameGetLineOrigins(frameRef, CFRangeMake(0, 0), lineOrigins);
+    
+    //
+    for (int i = 0; i < lineCount; i ++) {
+        CGPoint point = lineOrigins[i];
+        NSLog(@"point.y = %f",point.y);
+    }
+    
+    NSLog(@"font.ascender = %f,descender = %f,lineHeight = %f,leading = %f",defaultFont.ascender,defaultFont.descender, defaultFont.lineHeight, defaultFont.leading);
+    
+    CGFloat framey = 0;
+    for (CFIndex i = 0; i < lineCount; i ++) {
+        //
+        CTLineRef line = CFArrayGetValueAtIndex(lines, i);
+        CGFloat lineAscent;
+        CGFloat lineDescent;
+        CGFloat lineLeading; // 行距
+        //  // 该函数除了会设置好ascent,descent,leading之外，还会返回这行的宽度
+        CTLineGetTypographicBounds(line, &lineAscent, &lineDescent, &lineLeading);
+        NSLog(@"lineAscent = %f",lineAscent);
+        NSLog(@"lineDescent = %f",lineDescent);
+        NSLog(@"lineLeading = %f",lineLeading);
+        
+        CGPoint lineOrigin = lineOrigins[i];
+        NSLog(@"i = %ld, lineOrigin = %@",i,NSStringFromCGPoint(lineOrigin));
+        
+        // 微调Y值，需要注意的是CoreText的Y值是在baseLine处，而不是下方的descent。
+        if (i > 0) {
+            framey = framey - kLineLeading - lineAscent;
+            lineOrigin.y = framey;
+        }
+        else {
+            framey = lineOrigin.y;
+        }
+        NSLog(@"frameY = %f",framey);
+        
+        //调整坐标
+        CGContextSetTextPosition(context, lineOrigin.x, lineOrigin.y);
+        CTLineDraw(line, context);
+        
+        //微调
+        framey = framey - lineDescent;
+        //该方式与上述方式效果一样
+//        framey = framey - lineDescent - defaultFont.descender;
+    }
+    
+    CFRelease(path);
+    CFRelease(setterRef);
+    CFRelease(frameRef);
+}
+
+#pragma mark - 一行一行绘制，行高确定，行与行之间对齐
+- (void)drawRectWithLineByLineAligment {
+    //
+    
+    CGFloat width = CGRectGetWidth(self.bounds);
+    
+    //1
+    NSMutableAttributedString *attributed = [[NSMutableAttributedString alloc] initWithString:defaultString];
+    
+    //2
+    [self.class addDefaultAttribuateForContent:attributed withFont:defaultFont];
+    
+    CGFloat textHeight = [self.class textHeightWithDefaultLineHeightText:defaultString width:width font:defaultFont];
+    
+    //3
+    CGMutablePathRef path = CGPathCreateMutable();
+    CGPathAddRect(path, NULL, CGRectMake(0, 0, width, textHeight));
+    
+    
+    //4.生成CTFramesetterRef
+    CTFramesetterRef setterRef = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)attributed);
+    
+    CTFrameRef frameRef = CTFramesetterCreateFrame(setterRef, CFRangeMake(0, defaultString.length), path, NULL);
+    
+    //5
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    //6
+    CGContextSetTextMatrix(context, CGAffineTransformIdentity);
+    CGContextTranslateCTM(context, 0, textHeight);
+    CGContextScaleCTM(context, 1.0, -1.0);
+    
+    [[UIColor grayColor] setFill];
+    CGContextDrawPath(context, kCGPathFill);
+    
+    //
+    CGPathAddRect(path, NULL, CGRectMake(0, 0, width, textHeight));
+    
+    //一行行绘制
+    CFArrayRef lines = CTFrameGetLines(frameRef);
+    CFIndex lineCount = CFArrayGetCount(lines);
+    CGPoint lineOrigins[lineCount];
+    
+    //把CTFrame里每一行的初始坐标写到数组里， 注意CoreText的坐标是左下角的原点
+    CTFrameGetLineOrigins(frameRef, CFRangeMake(0, 0), lineOrigins);
+    
+    //
+    for (int i = 0; i < lineCount; i ++) {
+        CGPoint point = lineOrigins[i];
+        NSLog(@"point.y = %f",point.y);
+    }
+    
+    NSLog(@"font.ascender = %f,descender = %f,lineHeight = %f,leading = %f",defaultFont.ascender,defaultFont.descender, defaultFont.lineHeight, defaultFont.leading);
+    
+    CGFloat framey = 0;
+    for (CFIndex i = 0; i < lineCount; i ++) {
+        //
+        CTLineRef line = CFArrayGetValueAtIndex(lines, i);
+        CGFloat lineAscent;
+        CGFloat lineDescent;
+        CGFloat lineLeading; // 行距
+        //  // 该函数除了会设置好ascent,descent,leading之外，还会返回这行的宽度
+        CTLineGetTypographicBounds(line, &lineAscent, &lineDescent, &lineLeading);
+        NSLog(@"lineAscent = %f",lineAscent);
+        NSLog(@"lineDescent = %f",lineDescent);
+        NSLog(@"lineLeading = %f",lineLeading);
+        
+        CGPoint lineOrigin = lineOrigins[i];
+        NSLog(@"i = %ld, lineOrigin = %@",i,NSStringFromCGPoint(lineOrigin));
+        
+        // 微调Y值，需要注意的是CoreText的Y值是在baseLine处，而不是下方的descent。
+        CGFloat lineHeight = defaultFont.pointSize * kPerLineRatio;
+        
+        framey = textHeight - (i + 1) * lineHeight - defaultFont.descender;
+        
+        NSLog(@"frameY = %f",framey);
+        
+        lineOrigin.y = framey;
+        
+        //调整坐标
+        CGContextSetTextPosition(context, lineOrigin.x, lineOrigin.y);
+        CTLineDraw(line, context);
+    }
+    
+    CFRelease(path);
+    CFRelease(setterRef);
+    CFRelease(frameRef);
+}
+
+/**
+ *  高度 = (ascent + descent + linegap) * linecount
+ *
+ */
++ (CGFloat)textHeightWithText:(NSString *)text width:(CGFloat)width font:(UIFont *)font {
+    
+    NSMutableAttributedString *content = [[NSMutableAttributedString alloc] initWithString:text];
+    
+    //设置全局样式
+    [self addDefaultAttribuateForContent:content withFont:font];
+    
+    //生成frame setter
+    CTFramesetterRef framesetterRef = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)content);
+    
+    CGSize suggestSize = CTFramesetterSuggestFrameSizeWithConstraints(framesetterRef, CFRangeMake(0, text.length), NULL, CGSizeMake(width, CGFLOAT_MAX), NULL);
+    
+    CGMutablePathRef path = CGPathCreateMutable();
+    CGPathAddRect(path, NULL, CGRectMake(0, 0, width, suggestSize.height));
+    
+    CTFrameRef frameRef = CTFramesetterCreateFrame(framesetterRef, CFRangeMake(0, text.length), path, NULL);
+    
+    CFArrayRef lines = CTFrameGetLines(frameRef);
+    
+    CFIndex lineCount = CFArrayGetCount(lines);
+    
+    CGFloat ascent = 0;
+    CGFloat descent = 0;
+    CGFloat leading = 0;
+    
+    CGFloat totalHeight = 0;
+    
+    for (CFIndex i = 0; i < lineCount; i ++) {
+        
+        CTLineRef lineRef = CFArrayGetValueAtIndex(lines, i);
+        CTLineGetTypographicBounds(lineRef, &ascent, &descent, &leading);
+        NSLog(@"ascent = %f,descent = %f, leading = %f",ascent,descent,leading);
+        
+        totalHeight += ascent + descent + leading;
+    }
+    //
+//    leading = kLineLeading;
+    totalHeight += lineCount * leading;
+    NSLog(@"totalHeight = %f",totalHeight);
+    
+    return totalHeight;
+}
+
+// 在15字体下，比值小于这个计算出来的高度会导致emoji显示不全
+const CGFloat kPerLineRatio = 1.4;
+
+//固定行高
++ (CGFloat)textHeightWithDefaultLineHeightText:(NSString *)text width:(CGFloat)width font:(UIFont *)font {
+    
+    NSMutableAttributedString *content = [[NSMutableAttributedString alloc] initWithString:text];
+    
+    //设置全局样式
+    [self addDefaultAttribuateForContent:content withFont:font];
+    
+    //生成frame setter
+    CTFramesetterRef framesetterRef = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)content);
+    
+    CGSize suggestSize = CTFramesetterSuggestFrameSizeWithConstraints(framesetterRef, CFRangeMake(0, text.length), NULL, CGSizeMake(width, CGFLOAT_MAX), NULL);
+    NSLog(@"suggestHeight = %f",suggestSize.height);
+    
+    CGMutablePathRef path = CGPathCreateMutable();
+    CGPathAddRect(path, NULL, CGRectMake(0, 0, width, suggestSize.height));
+    
+    CTFrameRef frameRef = CTFramesetterCreateFrame(framesetterRef, CFRangeMake(0, text.length), path, NULL);
+    
+    CFArrayRef lines = CTFrameGetLines(frameRef);
+    
+    CFIndex lineCount = CFArrayGetCount(lines);
+    
+    CGFloat totalHeight = 0;
+    
+    
+    totalHeight += lineCount * (font.pointSize * kPerLineRatio);
+    NSLog(@"totalHeight = %f",totalHeight);
+    
+    return totalHeight;
+}
+
+
+
+
+- (void)drawTextAndPicture {
+    
     static NSString *KImageNameKey = @"imageName";
     
     //1: 获取当前上下文
@@ -272,7 +557,7 @@
     //4.3插入图片
     //CTRunDelegateCallbacks 一个用于保存指针的结构体， 由CTRun delegate进行回调
     CTRunDelegateCallbacks callBacks;
-//    memset(&callBacks, 0, sizeof(CTRunDelegateCallbacks));
+    //    memset(&callBacks, 0, sizeof(CTRunDelegateCallbacks));
     callBacks.version = kCTRunDelegateVersion1;
     callBacks.dealloc = RunDelegateDeallocCallBack;
     callBacks.getAscent = RunDelegateGetAscentCallBack;
@@ -287,8 +572,8 @@
         CTRunDelegateRef delegate = CTRunDelegateCreate(&callBacks, (__bridge void *)imageName);
         
         //使用OxFFC作为空白的展位符
-//        unichar objectReplacementChar = 0xFFFC; //图片占位
-//        NSString *content = [NSString stringWithCharacters:&objectReplacementChar length:1];
+        //        unichar objectReplacementChar = 0xFFFC; //图片占位
+        //        NSString *content = [NSString stringWithCharacters:&objectReplacementChar length:1];
         NSMutableAttributedString *space = [[NSMutableAttributedString alloc] initWithString:@" "];
         //本地图片
         [space addAttribute:(NSString *)kCTRunDelegateAttributeName value:(__bridge id)delegate range:NSMakeRange(0, 1)]; //设置代理项
@@ -299,29 +584,29 @@
         //将创建的空白attributedString插入当前的attributeString中，位置任意，但不能越界
         [attributedString insertAttributedString:space atIndex:10];
         
-
+        
     }
     
     NSString *picUrl = @"http://www.zoomfeng.com/images/2015/05/27/CoreText_3.png";
     
-//    {
-        NSDictionary *imageInfo = @{@"width" : @330, @"height" : @204};
-        
-        CTRunDelegateRef rundelegate = CTRunDelegateCreate(&callBacks, (__bridge void *)imageInfo);
-        
-        unichar objectReplacementChar = 0xFFFC;
-        NSString *content = [NSString stringWithCharacters:&objectReplacementChar length:1];
-        
-        NSMutableAttributedString *space = [[NSMutableAttributedString alloc] initWithString:content];
-        
-        [space addAttribute:(NSString *)kCTRunDelegateAttributeName value:(__bridge id)rundelegate range:NSMakeRange(0, 1)];
-        
-        CFRelease(rundelegate);
-        
-        [attributedString insertAttributedString:space atIndex:20];
-//
-//    }
-
+    //    {
+    NSDictionary *imageInfo = @{@"width" : @330, @"height" : @204};
+    
+    CTRunDelegateRef rundelegate = CTRunDelegateCreate(&callBacks, (__bridge void *)imageInfo);
+    
+    unichar objectReplacementChar = 0xFFFC;
+    NSString *content = [NSString stringWithCharacters:&objectReplacementChar length:1];
+    
+    NSMutableAttributedString *space = [[NSMutableAttributedString alloc] initWithString:content];
+    
+    [space addAttribute:(NSString *)kCTRunDelegateAttributeName value:(__bridge id)rundelegate range:NSMakeRange(0, 1)];
+    
+    CFRelease(rundelegate);
+    
+    [attributedString insertAttributedString:space atIndex:20];
+    //
+    //    }
+    
     
     //5: 根据string生成CTFramesetterRef
     CTFramesetterRef frameSetter = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)attributedString);
@@ -394,7 +679,7 @@
                     
                     //绘制网络图片
                     CGRect imageRect;
-//                    imageRect.size = image.size;
+                    //                    imageRect.size = image.size;
                     imageRect.size = CGSizeMake(330, 204); //这里要和delegate中设置的图片大小相同 否则则会导致其他文字部分被遮挡
                     NSLog(@"%.2f",lineOrigin.x); // 该值是0,runRect已经计算过起始值
                     imageRect.origin.x = runRect.origin.x;
@@ -414,10 +699,9 @@
     CFRelease(numberRef);
     CFRelease(path);
     CFRelease(frameSetter);
-    
-    /*devTQ: http://blog.devtang.com/blog/2015/06/27/using-coretext-1/*/
-
 }
+
+
 
 /**
  *  @brief  根据CTFrameRef获得绘制图片的区域
@@ -478,18 +762,53 @@
     }
     return CGRectZero;
 }
+static CGFloat kLineLeading = 2;
 
-//static CGFloat ascentCallBack(void *ref) {
-//    return [(NSNumber *)[(__bridge NSDictionary *)ref objectForKey:@"height"] floatValue];
-//}
-//
-//static CGFloat descentCallBack(void *ref) {
-//    return 0;
-//}
-//
-//static CGFloat widthCallBack(void *ref) {
-//    return [(NSNumber *)[(__bridge NSDictionary *)ref objectForKey:@"width"] floatValue];
-//}
++ (void)addDefaultAttribuateForContent:(NSMutableAttributedString *)content withFont:(UIFont *)font {
+    CGFloat lineLeading = kLineLeading;
+    
+    const CFIndex kNumberOfSetting = 2;
+    
+    CTParagraphStyleSetting lineBreakStyle;
+    CTLineBreakMode lineBreakModel = kCTLineBreakByWordWrapping;
+    lineBreakStyle.spec = kCTParagraphStyleSpecifierLineBreakMode;
+    lineBreakStyle.valueSize = sizeof(CTLineBreakMode);
+    lineBreakStyle.value = &lineBreakModel;
+    
+    CTParagraphStyleSetting lineSpaceStyle;
+    CTParagraphStyleSpecifier spec;
+    spec = kCTParagraphStyleSpecifierLineSpacingAdjustment;
+    lineSpaceStyle.spec = spec;
+    lineSpaceStyle.valueSize = sizeof(CGFloat);
+    lineSpaceStyle.value = &lineLeading;
+    
+    CTParagraphStyleSetting lineHeightStyle;
+    lineHeightStyle.spec = kCTParagraphStyleSpecifierMinimumLineHeight;
+    lineHeightStyle.valueSize = sizeof(CGFloat);
+    lineHeightStyle.value = &lineLeading;
+    
+    CTParagraphStyleSetting theSettings[kNumberOfSetting] = {
+        lineBreakStyle,
+        lineSpaceStyle,
+//        lineHeightStyle,
+    };
+    
+    CTParagraphStyleRef paragraphRef = CTParagraphStyleCreate(theSettings, kNumberOfSetting);
+    
+    //将样式应用于整段文字
+    [content addAttribute:NSParagraphStyleAttributeName value:(__bridge id)paragraphRef range:NSMakeRange(0, content.length)];
+    
+    CFStringRef fontName = (__bridge CFStringRef)font.fontName;
+    CTFontRef fontRef = CTFontCreateWithName(fontName, font.pointSize, NULL);
+    
+    //应用字体大小
+    [content addAttribute:NSFontAttributeName value:(__bridge id)fontRef range:NSMakeRange(0, content.length)];
+    
+    [content addAttribute:NSForegroundColorAttributeName value:[UIColor blackColor] range:NSMakeRange(0, content.length)];
+    
+    CFRelease(paragraphRef);
+    CFRelease(fontRef);
+}
 
 #pragma mark - Image delegate
 void RunDelegateDeallocCallBack(void *refcon) {
